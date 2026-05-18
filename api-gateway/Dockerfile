@@ -2,7 +2,9 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-RUN pip install fastapi uvicorn httpx prometheus-fastapi-instrumentator
+# Install from requirements to ensure all dependencies are present
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY main.py .
 

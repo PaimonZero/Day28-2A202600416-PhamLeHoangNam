@@ -178,6 +178,29 @@ docker exec lab28-kafka-1 kafka-topics --list --bootstrap-server localhost:9092
 
 Xem `SUBMISSION.md` ở thư mục gốc project.
 
+## Validated Local Run
+
+The current local setup was validated on Windows with Docker Desktop running:
+
+```bash
+docker compose up -d --build
+python scripts/01_ingest_to_kafka.py
+python prefect/flows/kafka_to_delta.py
+python scripts/03_delta_to_feast.py
+python scripts/05_embed_to_qdrant.py
+python scripts/production_readiness_check.py
+python -m pytest smoke-tests/ -v
+```
+
+Latest results:
+- Production readiness: `10/10 = 100%`
+- Smoke tests: `8 passed`
+
+Notes:
+- `.env` is used by Docker Compose and local embedding setup. It is intentionally git-ignored; `.env.example` documents the required variables.
+- `ALLOW_LLM_FALLBACK=true` keeps the API Gateway available when the Colab/ngrok vLLM tunnel is down.
+- For real vLLM latency testing, set `LLM_TIMEOUT_SECONDS=45` in `.env` and restart `api-gateway`.
+
 ## License
 
 Edu

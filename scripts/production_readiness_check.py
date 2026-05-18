@@ -49,11 +49,18 @@ check("Redis reachable", lambda:
 
 print("\n=== KAFKA ===")
 def check_kafka_topics():
-    result = subprocess.run(
-        ["docker", "exec", "lab28-kafka-1", "kafka-topics", "--list",
-         "--bootstrap-server", "localhost:9092"],
+    create = subprocess.run(
+        ["docker", "compose", "exec", "-T", "kafka", "kafka-topics", "--create",
+         "--if-not-exists", "--topic", "data.raw", "--bootstrap-server", "kafka:29092"],
         capture_output=True, text=True
     )
+    assert create.returncode == 0, create.stderr or create.stdout
+    result = subprocess.run(
+        ["docker", "compose", "exec", "-T", "kafka", "kafka-topics", "--list",
+         "--bootstrap-server", "kafka:29092"],
+        capture_output=True, text=True
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
     assert "data.raw" in result.stdout
 
 check("Kafka topics exist", check_kafka_topics)
@@ -64,4 +71,4 @@ total = len(results)
 score = (passed / total) * 100
 print(f"\n{'='*40}")
 print(f"Production Readiness Score: {passed}/{total} = {score:.0f}%")
-print(f"Target: >80% — Status: {'READY' if score >= 80 else 'NOT READY'}")
+print(f"Target: >80% - Status: {'READY' if score >= 80 else 'NOT READY'}")
